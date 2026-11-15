@@ -1,0 +1,23 @@
+{
+  "name": "Design Live Bridge",
+  "id": "1702729366449159453",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "documentAccess": "dynamic-page",
+  "editorType": [
+    "figma"
+  ],
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": [
+      "none"
+    ],
+    "devAllowedDomains": [
+      "ws://localhost:3055",
+      "http://localhost:3055"
+    ],
+    "reasoning": "Dev only: connects to a local bridge so an AI agent can read design info."
+  }
+}

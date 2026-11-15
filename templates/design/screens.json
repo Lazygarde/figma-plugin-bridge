@@ -1,0 +1,12 @@
+{
+  "_comment": "Registry of implemented screens. status: todo | in-progress | done. Update when a screen is finished or the design changes.",
+  "screens": [
+    {
+      "name": "Example screen",
+      "figmaFile": "<file key or name>",
+      "nodeId": "0:0",
+      "file": "feature/example/ui/ExampleScreen.kt",
+      "status": "todo"
+    }
+  ]
+}

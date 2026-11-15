@@ -1,0 +1,11 @@
+{
+  "name": "figma-to-android",
+  "displayName": "Figma to Android",
+  "version": "0.1.0",
+  "description": "Turn Figma designs into Android Jetpack Compose UI: reads design data live from Figma Desktop through a local bridge (no Figma API rate limits), with skills for reading Figma JSON, layout/responsive mapping and visual verification.",
+  "suggestedPrompts": [
+    "Implement this Figma frame in Compose: <paste Figma link or node id>",
+    "Extract the design tokens used by the selected Figma frame and map them to our Theme",
+    "Compare my Compose screen with the Figma frame and fix the differences"
+  ]
+}

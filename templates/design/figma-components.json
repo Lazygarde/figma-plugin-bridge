@@ -1,0 +1,13 @@
+{
+  "_comment": "Maps a Figma component set / variant to an existing Composable. Key = component set name from `componentSets`, or the component name from `components`. Replace the examples.",
+  "components": {
+    "Button": {
+      "composable": "com.example.ui.components.AppButton",
+      "import": "com.example.ui.components.AppButton",
+      "variants": {
+        "Type=Square, Size=Large, Style=Primary": "AppButton(style = ButtonStyle.Primary, size = ButtonSize.Large)"
+      },
+      "notes": "Label is the `text` parameter. Icons are optional slots."
+    }
+  }
+}

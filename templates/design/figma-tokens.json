@@ -1,0 +1,11 @@
+{
+  "_comment": "Maps a Figma variable name (as returned by figma_get_node `variables[*].name`) to the Kotlin token of this project. Replace the examples. Unmapped tokens must be reported, not invented.",
+  "tokens": {
+    "spacing/md": { "kotlin": "AppTheme.spacing.md" },
+    "color/text/on-primary": { "kotlin": "AppTheme.colors.onPrimary" },
+    "radius/lg": { "kotlin": "AppTheme.shapes.large" }
+  },
+  "textStyles": {
+    "Body 16-24/Semibold": { "kotlin": "AppTheme.typography.bodyLargeSemibold" }
+  }
+}

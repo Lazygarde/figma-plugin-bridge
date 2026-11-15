@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font: 12px/1.4 -apple-system, system-ui, sans-serif; margin: 12px; color: #222; }
+  h3 { margin: 0 0 8px; font-size: 13px; }
+  .row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #c33; }
+  .dot.on { background: #2a2; }
+  #log { height: 110px; overflow: auto; background: #f4f4f4; border-radius: 4px; padding: 6px; font: 11px monospace; white-space: pre-wrap; }
+  button { font: inherit; padding: 4px 10px; }
+</style>
+</head>
+<body>
+  <h3>Design Live Bridge</h3>
+  <div class="row"><span id="dot" class="dot"></span><span id="status">connecting...</span></div>
+  <div id="sel" class="row">Selection: none</div>
+  <div id="log"></div>
+  <div class="row" style="margin-top:8px"><button id="close">Close plugin</button></div>
+
+<script>
+  const WS_URL = 'ws://localhost:3055/plugin';
+  let ws = null;
+  let retryTimer = null;
+
+  const $ = (id) => document.getElementById(id);
+  function log(line) {
+    const el = $('log');
+    el.textContent += line + '\n';
+    el.scrollTop = el.scrollHeight;
+  }
+  function setStatus(on, text) {
+    $('dot').className = 'dot' + (on ? ' on' : '');
+    $('status').textContent = text;
+  }
+
+  // Uint8Array -> base64 without blowing the call stack on large images.
+  function toBase64(bytes) {
+    let bin = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(bin);
+  }
+
+  function connect() {
+    clearTimeout(retryTimer);
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => {
+      setStatus(true, 'connected to bridge');
+      log('connected');
+    };
+    ws.onclose = () => {
+      setStatus(false, 'disconnected, retrying...');
+      retryTimer = setTimeout(connect, 2000);
+    };
+    ws.onerror = () => { /* onclose handles retry */ };
+    ws.onmessage = (ev) => {
+      let m;
+      try { m = JSON.parse(ev.data); } catch { return; }
+      if (m.type !== 'command') return;
+      log('<- ' + m.cmd + ' ' + JSON.stringify(m.args || {}));
+      // Forward to the main thread (which owns figma.*).
+      parent.postMessage({ pluginMessage: { type: 'command', reqId: m.reqId, cmd: m.cmd, args: m.args } }, '*');
+    };
+  }
+
+  // Results coming back from the main thread -> send to bridge.
+  onmessage = (ev) => {
+    const m = ev.data && ev.data.pluginMessage;
+    if (!m) return;
+    if (m.type === 'selection') {
+      $('sel').textContent = 'Selection: ' + (m.selection.length
+        ? m.selection.map((n) => n.name + ' (' + n.id + ')').join(', ')
+        : 'none');
+      return;
+    }
+    if (m.type !== 'result') return;
+    const payload = { type: 'result', reqId: m.reqId, ok: m.ok, data: m.data, error: m.error };
+    if (m.bytes) {
+      payload.base64 = toBase64(m.bytes);
+      payload.mime = m.mime;
+    }
+    if (m.files) {
+      payload.files = m.files.map((f) => ({ name: f.name, mime: f.mime, base64: toBase64(f.bytes) }));
+    }
+    log('-> ' + (m.ok ? 'ok' : 'error: ' + m.error));
+    if (ws && ws.readyState === 1) ws.send(JSON.stringify(payload));
+  };
+
+  $('close').onclick = () => parent.postMessage({ pluginMessage: { type: 'close' } }, '*');
+  connect();
+</script>
+</body>
+</html>
